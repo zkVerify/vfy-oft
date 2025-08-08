@@ -7,17 +7,17 @@ import type { OAppOmniGraphHardhat, OmniPointHardhat } from '@layerzerolabs/tool
  */
 const sepoliaContract: OmniPointHardhat = {
     eid: EndpointId.SEPOLIA_V2_TESTNET,
-    contractName: 'MyNativeOFTAdapter',
+    contractName: 'VfyNativeOFTAdapter',
 }
 
 const fujiContract: OmniPointHardhat = {
     eid: EndpointId.AVALANCHE_V2_TESTNET,
-    contractName: 'MyOFT',
+    contractName: 'VfyOFT',
 }
 
 const amoyContract: OmniPointHardhat = {
     eid: EndpointId.AMOY_V2_TESTNET,
-    contractName: 'MyOFT',
+    contractName: 'VfyOFT',
 }
 
 const config: OAppOmniGraphHardhat = {

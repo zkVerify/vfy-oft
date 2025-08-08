@@ -20,7 +20,7 @@ import "forge-std/console.sol";
 // DevTools imports
 import { TestHelperOz5 } from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
-contract MyNativeOFTAdapterTest is TestHelperOz5 {
+contract VfyNativeOFTAdapterTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
 
     uint32 private aEid = 1;

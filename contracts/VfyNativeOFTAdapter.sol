@@ -12,7 +12,7 @@ import { NativeOFTAdapter } from "@layerzerolabs/oft-evm/contracts/NativeOFTAdap
  * unless you make a NON-default implementation of OFT and needs to be done very carefully.
  * @dev WARNING: The default NativeOFTAdapter implementation assumes LOSSLESS transfers, ie. 1 native in, 1 native out.
  */
-contract MyNativeOFTAdapter is NativeOFTAdapter {
+contract VfyNativeOFTAdapter is NativeOFTAdapter {
     constructor(
         uint8 _localDecimals,
         address _lzEndpoint,

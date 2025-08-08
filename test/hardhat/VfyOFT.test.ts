@@ -5,18 +5,18 @@ import { deployments, ethers } from 'hardhat'
 
 import { Options } from '@layerzerolabs/lz-v2-utilities'
 
-describe('MyOFT Test', function () {
+describe('fyOFT Test', function () {
     // Constant representing a mock Endpoint ID for testing purposes
     const eidA = 1
     const eidB = 2
     // Declaration of variables to be used in the test suite
-    let MyOFT: ContractFactory
+    let VfyOFT: ContractFactory
     let EndpointV2Mock: ContractFactory
     let ownerA: SignerWithAddress
     let ownerB: SignerWithAddress
     let endpointOwner: SignerWithAddress
-    let myOFTA: Contract
-    let myOFTB: Contract
+    let vfyOFTA: Contract
+    let vfyOFTB: Contract
     let mockEndpointV2A: Contract
     let mockEndpointV2B: Contract
 
@@ -25,7 +25,7 @@ describe('MyOFT Test', function () {
         // Contract factory for our tested contract
         //
         // We are using a derived contract that exposes a mint() function for testing purposes
-        MyOFT = await ethers.getContractFactory('MyOFTMock')
+        VfyOFT = await ethers.getContractFactory('VfyOFTMock')
 
         // Fetching the first three signers (accounts) from Hardhat's local Ethereum network
         const signers = await ethers.getSigners()
@@ -49,24 +49,24 @@ describe('MyOFT Test', function () {
         mockEndpointV2A = await EndpointV2Mock.deploy(eidA)
         mockEndpointV2B = await EndpointV2Mock.deploy(eidB)
 
-        // Deploying two instances of MyOFT contract with different identifiers and linking them to the mock LZEndpoint
-        myOFTA = await MyOFT.deploy('aOFT', 'aOFT', mockEndpointV2A.address, ownerA.address)
-        myOFTB = await MyOFT.deploy('bOFT', 'bOFT', mockEndpointV2B.address, ownerB.address)
+        // Deploying two instances of VfyOFT contract with different identifiers and linking them to the mock LZEndpoint
+        vfyOFTA = await VfyOFT.deploy('aOFT', 'aOFT', mockEndpointV2A.address, ownerA.address)
+        vfyOFTB = await VfyOFT.deploy('bOFT', 'bOFT', mockEndpointV2B.address, ownerB.address)
 
-        // Setting destination endpoints in the LZEndpoint mock for each MyOFT instance
-        await mockEndpointV2A.setDestLzEndpoint(myOFTB.address, mockEndpointV2B.address)
-        await mockEndpointV2B.setDestLzEndpoint(myOFTA.address, mockEndpointV2A.address)
+        // Setting destination endpoints in the LZEndpoint mock for each VfyOFT instance
+        await mockEndpointV2A.setDestLzEndpoint(vfyOFTB.address, mockEndpointV2B.address)
+        await mockEndpointV2B.setDestLzEndpoint(vfyOFTA.address, mockEndpointV2A.address)
 
-        // Setting each MyOFT instance as a peer of the other in the mock LZEndpoint
-        await myOFTA.connect(ownerA).setPeer(eidB, ethers.utils.zeroPad(myOFTB.address, 32))
-        await myOFTB.connect(ownerB).setPeer(eidA, ethers.utils.zeroPad(myOFTA.address, 32))
+        // Setting each VfyOFT instance as a peer of the other in the mock LZEndpoint
+        await vfyOFTA.connect(ownerA).setPeer(eidB, ethers.utils.zeroPad(vfyOFTB.address, 32))
+        await vfyOFTB.connect(ownerB).setPeer(eidA, ethers.utils.zeroPad(vfyOFTA.address, 32))
     })
 
     // A test case to verify token transfer functionality
     it('should send a token from A address to B address via each OFT', async function () {
-        // Minting an initial amount of tokens to ownerA's address in the myOFTA contract
+        // Minting an initial amount of tokens to ownerA's address in the vfyOFTA contract
         const initialAmount = ethers.utils.parseEther('100')
-        await myOFTA.mint(ownerA.address, initialAmount)
+        await vfyOFTA.mint(ownerA.address, initialAmount)
 
         // Defining the amount of tokens to send and constructing the parameters for the send operation
         const tokensToSend = ethers.utils.parseEther('1')
@@ -85,14 +85,14 @@ describe('MyOFT Test', function () {
         ]
 
         // Fetching the native fee for the token send operation
-        const [nativeFee] = await myOFTA.quoteSend(sendParam, false)
+        const [nativeFee] = await vfyOFTA.quoteSend(sendParam, false)
 
-        // Executing the send operation from myOFTA contract
-        await myOFTA.send(sendParam, [nativeFee, 0], ownerA.address, { value: nativeFee })
+        // Executing the send operation from vfyOFTA contract
+        await vfyOFTA.send(sendParam, [nativeFee, 0], ownerA.address, { value: nativeFee })
 
         // Fetching the final token balances of ownerA and ownerB
-        const finalBalanceA = await myOFTA.balanceOf(ownerA.address)
-        const finalBalanceB = await myOFTB.balanceOf(ownerB.address)
+        const finalBalanceA = await vfyOFTA.balanceOf(ownerA.address)
+        const finalBalanceB = await vfyOFTB.balanceOf(ownerB.address)
 
         // Asserting that the final balances are as expected after the send operation
         expect(finalBalanceA).eql(initialAmount.sub(tokensToSend))

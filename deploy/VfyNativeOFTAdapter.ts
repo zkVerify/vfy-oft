@@ -2,7 +2,7 @@ import assert from 'assert'
 
 import { type DeployFunction } from 'hardhat-deploy/types'
 
-const contractName = 'MyOFT'
+const contractName = 'VfyNativeOFTAdapter'
 
 const deploy: DeployFunction = async (hre) => {
     const { getNamedAccounts, deployments } = hre
@@ -36,8 +36,7 @@ const deploy: DeployFunction = async (hre) => {
     const { address } = await deploy(contractName, {
         from: deployer,
         args: [
-            'MyOFT', // name
-            'MOFT', // symbol
+            18, // TODO update this with native local decimals
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
             deployer, // owner
         ],

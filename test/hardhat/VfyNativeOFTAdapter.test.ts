@@ -5,19 +5,19 @@ import { deployments, ethers } from 'hardhat'
 
 import { Options } from '@layerzerolabs/lz-v2-utilities'
 
-describe('MyNativeOFTAdapter Test', function () {
+describe('VfyNativeOFTAdapter Test', function () {
     // Constant representing a mock Endpoint ID for testing purposes
     const eidA = 1
     const eidB = 2
     // Declaration of variables to be used in the test suite
-    let MyNativeOFTAdapter: ContractFactory
-    let MyOFT: ContractFactory
+    let VfyNativeOFTAdapter: ContractFactory
+    let VfyOFT: ContractFactory
     let EndpointV2Mock: ContractFactory
     let ownerA: SignerWithAddress
     let ownerB: SignerWithAddress
     let endpointOwner: SignerWithAddress
-    let myNativeOFTAdapter: Contract
-    let myOFTB: Contract
+    let vfyNativeOFTAdapter: Contract
+    let vfyOFTB: Contract
     let mockEndpointV2A: Contract
     let mockEndpointV2B: Contract
 
@@ -26,9 +26,9 @@ describe('MyNativeOFTAdapter Test', function () {
         // Contract factory for our tested contract
         //
         // We are using a derived contract that exposes a mint() function for testing purposes
-        MyNativeOFTAdapter = await ethers.getContractFactory('MyNativeOFTAdapterMock')
+        VfyNativeOFTAdapter = await ethers.getContractFactory('VfyNativeOFTAdapterMock')
 
-        MyOFT = await ethers.getContractFactory('MyOFTMock')
+        VfyOFT = await ethers.getContractFactory('VfyOFTMock')
 
         // Fetching the first three signers (accounts) from Hardhat's local Ethereum network
         const signers = await ethers.getSigners()
@@ -53,16 +53,16 @@ describe('MyNativeOFTAdapter Test', function () {
         mockEndpointV2B = await EndpointV2Mock.deploy(eidB)
 
         // Deploying contracts and linking them to the mock LZEndpoint
-        myNativeOFTAdapter = await MyNativeOFTAdapter.deploy(18, mockEndpointV2A.address, ownerA.address)
-        myOFTB = await MyOFT.deploy('myOFTB', 'bOFT', mockEndpointV2B.address, ownerB.address)
+        vfyNativeOFTAdapter = await VfyNativeOFTAdapter.deploy(18, mockEndpointV2A.address, ownerA.address)
+        vfyOFTB = await VfyOFT.deploy('vfyOFTB', 'bOFT', mockEndpointV2B.address, ownerB.address)
 
-        // Setting destination endpoints in the LZEndpoint mock for each MyOFT instance
-        await mockEndpointV2A.setDestLzEndpoint(myOFTB.address, mockEndpointV2B.address)
-        await mockEndpointV2B.setDestLzEndpoint(myNativeOFTAdapter.address, mockEndpointV2A.address)
+        // Setting destination endpoints in the LZEndpoint mock for each VfyOFT instance
+        await mockEndpointV2A.setDestLzEndpoint(vfyOFTB.address, mockEndpointV2B.address)
+        await mockEndpointV2B.setDestLzEndpoint(vfyNativeOFTAdapter.address, mockEndpointV2A.address)
 
         // Setting peers in the mock LZEndpoint
-        await myNativeOFTAdapter.connect(ownerA).setPeer(eidB, ethers.utils.zeroPad(myOFTB.address, 32))
-        await myOFTB.connect(ownerB).setPeer(eidA, ethers.utils.zeroPad(myNativeOFTAdapter.address, 32))
+        await vfyNativeOFTAdapter.connect(ownerA).setPeer(eidB, ethers.utils.zeroPad(vfyOFTB.address, 32))
+        await vfyOFTB.connect(ownerB).setPeer(eidA, ethers.utils.zeroPad(vfyNativeOFTAdapter.address, 32))
     })
 
     // A test case to verify native transfer functionality
@@ -86,20 +86,20 @@ describe('MyNativeOFTAdapter Test', function () {
         ]
 
         // Fetching the native fee for the token send operation
-        const [nativeFee] = await myNativeOFTAdapter.connect(ownerA).quoteSend(sendParam, false)
+        const [nativeFee] = await vfyNativeOFTAdapter.connect(ownerA).quoteSend(sendParam, false)
 
-        const msgValue = nativeFee.add(await myNativeOFTAdapter.removeDust(amountToSend))
+        const msgValue = nativeFee.add(await vfyNativeOFTAdapter.removeDust(amountToSend))
 
-        // Executing the send operation from myNativeOFTAdapter contract
-        const tx = await myNativeOFTAdapter
+        // Executing the send operation from vfyNativeOFTAdapter contract
+        const tx = await vfyNativeOFTAdapter
             .connect(ownerA)
             .send(sendParam, [nativeFee, 0], ownerA.address, { value: msgValue })
         const receipt = await tx.wait()
 
         // Fetching the final balances of ownerA, ownerB, and adapter
         const finalBalanceA = await ethers.provider.getBalance(ownerA.address)
-        const finalBalanceAdapter = await ethers.provider.getBalance(myNativeOFTAdapter.address)
-        const finalBalanceB = await myOFTB.balanceOf(ownerB.address)
+        const finalBalanceAdapter = await ethers.provider.getBalance(vfyNativeOFTAdapter.address)
+        const finalBalanceB = await vfyOFTB.balanceOf(ownerB.address)
 
         const gasUsed = receipt.gasUsed.mul(receipt.effectiveGasPrice)
         const expectedFinalBalanceA = initialBalanceA.sub(msgValue.add(gasUsed))
