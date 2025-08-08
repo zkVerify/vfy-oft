@@ -16,6 +16,10 @@
 
 <p align="center">Template project for getting started with LayerZero's <code>NativeOFTAdapter</code> contract development.</p>
 
+## 0) Note
+
+The following instruction are the ones included in the ofiicial `NativeOFTAdapter` example. For more complete instructions on configuring the chains, and deploying and wiring the contracts, please refer to the more complete [`OFTAdapter` example](https://github.com/LayerZero-Labs/devtools/blob/main/examples/oft-adapter/README.md).
+
 ## 1) Developing Contracts
 
 #### Installing dependencies
