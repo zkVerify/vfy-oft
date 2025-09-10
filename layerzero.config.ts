@@ -3,59 +3,35 @@ import { EndpointId } from '@layerzerolabs/lz-definitions'
 import type { OAppOmniGraphHardhat, OmniPointHardhat } from '@layerzerolabs/toolbox-hardhat'
 
 /**
- *  WARNING: ONLY 1 NativeOFTAdapter should exist for a given global mesh.
+ *  WARNING: ONLY 1 VfyNativeOFTAdapter should exist for a given global mesh.
  */
-const sepoliaContract: OmniPointHardhat = {
-    eid: EndpointId.SEPOLIA_V2_TESTNET,
+const zkVerifyTestnetContract: OmniPointHardhat = {
+    eid: EndpointId.ZKVERIFY_V2_TESTNET,
     contractName: 'VfyNativeOFTAdapter',
 }
 
-const fujiContract: OmniPointHardhat = {
-    eid: EndpointId.AVALANCHE_V2_TESTNET,
-    contractName: 'VfyOFT',
-}
-
-const amoyContract: OmniPointHardhat = {
-    eid: EndpointId.AMOY_V2_TESTNET,
+const baseTestnetContract: OmniPointHardhat = {
+    eid: EndpointId.BASESEP_V2_TESTNET,
     contractName: 'VfyOFT',
 }
 
 const config: OAppOmniGraphHardhat = {
     contracts: [
         {
-            contract: fujiContract,
+            contract: zkVerifyTestnetContract,
         },
         {
-            contract: sepoliaContract,
-        },
-        {
-            contract: amoyContract,
+            contract: baseTestnetContract,
         },
     ],
     connections: [
         {
-            from: fujiContract,
-            to: sepoliaContract,
+            from: zkVerifyTestnetContract,
+            to: baseTestnetContract,
         },
         {
-            from: fujiContract,
-            to: amoyContract,
-        },
-        {
-            from: sepoliaContract,
-            to: fujiContract,
-        },
-        {
-            from: sepoliaContract,
-            to: amoyContract,
-        },
-        {
-            from: amoyContract,
-            to: sepoliaContract,
-        },
-        {
-            from: amoyContract,
-            to: fujiContract,
+            from: baseTestnetContract,
+            to: zkVerifyTestnetContract,
         },
     ],
 }
