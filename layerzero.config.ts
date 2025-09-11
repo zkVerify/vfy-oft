@@ -1,6 +1,7 @@
+import { ExecutorOptionType } from '@layerzerolabs/lz-v2-utilities'
+import { OAppEnforcedOption, OmniPointHardhat } from '@layerzerolabs/toolbox-hardhat'
 import { EndpointId } from '@layerzerolabs/lz-definitions'
-
-import type { OAppOmniGraphHardhat, OmniPointHardhat } from '@layerzerolabs/toolbox-hardhat'
+import { generateConnectionsConfig } from '@layerzerolabs/metadata-tools'
 
 /**
  *  WARNING: ONLY 1 VfyNativeOFTAdapter should exist for a given global mesh.
@@ -15,25 +16,65 @@ const baseTestnetContract: OmniPointHardhat = {
     contractName: 'VfyOFT',
 }
 
-const config: OAppOmniGraphHardhat = {
-    contracts: [
-        {
-            contract: zkVerifyTestnetContract,
-        },
-        {
-            contract: baseTestnetContract,
-        },
-    ],
-    connections: [
-        {
-            from: zkVerifyTestnetContract,
-            to: baseTestnetContract,
-        },
-        {
-            from: baseTestnetContract,
-            to: zkVerifyTestnetContract,
-        },
-    ],
+const bscTestnetContract: OmniPointHardhat = {
+    eid: EndpointId.BSC_V2_TESTNET,
+    contractName: 'VfyOFT',
 }
 
-export default config
+const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [
+    {
+        msgType: 1,
+        optionType: ExecutorOptionType.LZ_RECEIVE,
+        gas: 80000,
+        value: 0,
+    },
+    {
+        msgType: 2,
+        optionType: ExecutorOptionType.LZ_RECEIVE,
+        gas: 80000,
+        value: 0,
+    },
+    {
+        msgType: 2,
+        optionType: ExecutorOptionType.COMPOSE,
+        index: 0,
+        gas: 80000,
+        value: 0,
+    },
+]
+
+export default async function () {
+    const connections = await generateConnectionsConfig([
+        [
+            zkVerifyTestnetContract,
+            bscTestnetContract,
+            [['LayerZero Labs'], []],
+            [1, 1],
+            [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
+        ],
+        // Waiting for LZ team to wire Base Sepolia to zkVerify
+        // [
+        //     zkVerifyTestnetContract,
+        //     baseTestnetContract,
+        //     [['LayerZero Labs'], []],
+        //     [1, 1],
+        //     [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
+        // ],
+        [
+            baseTestnetContract,
+            bscTestnetContract,
+            [['LayerZero Labs'], []],
+            [1, 1],
+            [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
+        ],
+    ])
+
+    return {
+        contracts: [
+            { contract: zkVerifyTestnetContract },
+            { contract: baseTestnetContract },
+            { contract: bscTestnetContract },
+        ],
+        connections,
+    }
+}
