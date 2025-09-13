@@ -52,14 +52,13 @@ export default async function () {
             [6, 3],
             [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
         ],
-        // Waiting for LZ team to wire Base Sepolia to zkVerify
-        // [
-        //     zkVerifyTestnetContract,
-        //     baseTestnetContract,
-        //     [['Horizen'], [['LayerZero Labs'], 1]],
-        //     [6, 3],
-        //     [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
-        // ],
+        [
+            zkVerifyTestnetContract,
+            baseTestnetContract,
+            [['Horizen'], [['LayerZero Labs'], 1]],
+            [6, 3],
+            [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
+        ],
         [
             baseTestnetContract,
             bscTestnetContract,
