@@ -67,6 +67,14 @@ const config: HardhatUserConfig = {
             url: process.env.RPC_URL_BSC_TESTNET || 'https://bsc-testnet-rpc.publicnode.com',
             accounts,
         },
+        base: {
+            eid: EndpointId.BASE_V2_MAINNET,
+            url: process.env.RPC_URL_BASE_MAINNET || 'https://base-rpc.publicnode.com',
+        },
+        // zkverify: {
+        //     eid: EndpointId.ZKVERIFY_V2_MAINNET,
+        //     url: process.env.RPC_URL_ZKVERIFY_MAINNET || 'https://vflow-rpc.zkverify.io',
+        // },
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
             allowUnlimitedContractSize: true,
