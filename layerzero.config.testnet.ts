@@ -4,21 +4,21 @@ import { EndpointId } from '@layerzerolabs/lz-definitions'
 import { generateConnectionsConfig } from '@layerzerolabs/metadata-tools'
 
 /**
- *  WARNING: ONLY 1 VfyNativeOFTAdapter should exist for a given global mesh.
+ *  WARNING: ONLY 1 ZkVerifyOFTAdapter should exist for a given global mesh.
  */
 const zkVerifyTestnetContract: OmniPointHardhat = {
     eid: EndpointId.ZKVERIFY_V2_TESTNET,
-    contractName: 'VfyNativeOFTAdapter',
+    contractName: 'ZkVerifyOFTAdapter',
 }
 
 const baseTestnetContract: OmniPointHardhat = {
     eid: EndpointId.BASESEP_V2_TESTNET,
-    contractName: 'VfyOFT',
+    contractName: 'ZkVerifyToken',
 }
 
 const bscTestnetContract: OmniPointHardhat = {
     eid: EndpointId.BSC_V2_TESTNET,
-    contractName: 'VfyOFT',
+    contractName: 'ZkVerifyToken',
 }
 
 const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [

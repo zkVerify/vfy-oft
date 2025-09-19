@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { OFT } from "@layerzerolabs/oft-evm/contracts/OFT.sol";
 
-contract VfyOFT is OFT {
+contract ZkVerifyToken is OFT {
     constructor(
         string memory _name,
         string memory _symbol,
