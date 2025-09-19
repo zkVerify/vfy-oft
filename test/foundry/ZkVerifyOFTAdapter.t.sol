@@ -1,23 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.22;
 
 // Mock imports
 import { OFTMock } from "../mocks/OFTMock.sol";
-import { ERC20Mock } from "../mocks/ERC20Mock.sol";
+import { NativeOFTAdapterMock } from "../mocks/NativeOFTAdapterMock.sol";
 import { OFTComposerMock } from "../mocks/OFTComposerMock.sol";
 
 // OApp imports
-import { IOAppOptionsType3, EnforcedOptionParam } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 
 // OFT imports
-import { IOFT, SendParam, OFTReceipt } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+import { SendParam, OFTReceipt } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import { MessagingFee, MessagingReceipt } from "@layerzerolabs/oft-evm/contracts/OFTCore.sol";
-import { OFTMsgCodec } from "@layerzerolabs/oft-evm/contracts/libs/OFTMsgCodec.sol";
 import { OFTComposeMsgCodec } from "@layerzerolabs/oft-evm/contracts/libs/OFTComposeMsgCodec.sol";
-
-// OZ imports
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // Forge imports
 import "forge-std/console.sol";
@@ -25,83 +20,86 @@ import "forge-std/console.sol";
 // DevTools imports
 import { TestHelperOz5 } from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
-contract VfyOFTTest is TestHelperOz5 {
+contract ZkVerifyOFTAdapterTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
 
     uint32 private aEid = 1;
     uint32 private bEid = 2;
 
-    OFTMock private aOFT;
+    NativeOFTAdapterMock private nativeOFTAdapter;
     OFTMock private bOFT;
 
     address private userA = address(0x1);
     address private userB = address(0x2);
-    uint256 private initialBalance = 100 ether;
+    uint256 private initialNativeBalance = 1000 ether;
 
     function setUp() public virtual override {
-        vm.deal(userA, 1000 ether);
-        vm.deal(userB, 1000 ether);
+        vm.deal(userA, initialNativeBalance);
 
         super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
-        aOFT = OFTMock(
-            _deployOApp(type(OFTMock).creationCode, abi.encode("aOFT", "aOFT", address(endpoints[aEid]), address(this)))
+        nativeOFTAdapter = NativeOFTAdapterMock(
+            _deployOApp(
+                type(NativeOFTAdapterMock).creationCode,
+                abi.encode(18, address(endpoints[aEid]), address(this))
+            )
         );
 
         bOFT = OFTMock(
-            _deployOApp(type(OFTMock).creationCode, abi.encode("bOFT", "bOFT", address(endpoints[bEid]), address(this)))
+            _deployOApp(type(OFTMock).creationCode, abi.encode("Token", "TKN", address(endpoints[bEid]), address(this)))
         );
 
-        // config and wire the ofts
+        // config and wire
         address[] memory ofts = new address[](2);
-        ofts[0] = address(aOFT);
+        ofts[0] = address(nativeOFTAdapter);
         ofts[1] = address(bOFT);
         this.wireOApps(ofts);
-
-        // mint tokens
-        aOFT.mint(userA, initialBalance);
-        bOFT.mint(userB, initialBalance);
     }
 
     function test_constructor() public {
-        assertEq(aOFT.owner(), address(this));
+        assertEq(nativeOFTAdapter.owner(), address(this));
         assertEq(bOFT.owner(), address(this));
 
-        assertEq(aOFT.balanceOf(userA), initialBalance);
-        assertEq(bOFT.balanceOf(userB), initialBalance);
+        assertEq(bOFT.balanceOf(userB), 0);
 
-        assertEq(aOFT.token(), address(aOFT));
+        assertEq(nativeOFTAdapter.token(), address(0));
         assertEq(bOFT.token(), address(bOFT));
+
+        assertEq(nativeOFTAdapter.approvalRequired(), false);
     }
 
-    function test_send_oft() public {
-        uint256 tokensToSend = 1 ether;
+    function test_send_native_oft_adapter() public {
+        uint256 amountToSend = 1 ether;
         bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(200000, 0);
         SendParam memory sendParam = SendParam(
             bEid,
             addressToBytes32(userB),
-            tokensToSend,
-            tokensToSend,
+            amountToSend,
+            amountToSend,
             options,
             "",
             ""
         );
-        MessagingFee memory fee = aOFT.quoteSend(sendParam, false);
+        MessagingFee memory fee = nativeOFTAdapter.quoteSend(sendParam, false);
 
-        assertEq(aOFT.balanceOf(userA), initialBalance);
-        assertEq(bOFT.balanceOf(userB), initialBalance);
+        assertEq(userA.balance, initialNativeBalance);
+        assertEq(address(nativeOFTAdapter).balance, 0);
+        assertEq(bOFT.balanceOf(userB), 0);
+
+        uint256 msgValue = fee.nativeFee + nativeOFTAdapter.removeDust(amountToSend);
 
         vm.prank(userA);
-        aOFT.send{ value: fee.nativeFee }(sendParam, fee, payable(address(this)));
+        nativeOFTAdapter.send{ value: msgValue }(sendParam, fee, payable(address(this)));
         verifyPackets(bEid, addressToBytes32(address(bOFT)));
 
-        assertEq(aOFT.balanceOf(userA), initialBalance - tokensToSend);
-        assertEq(bOFT.balanceOf(userB), initialBalance + tokensToSend);
+        assertEq(userA.balance, initialNativeBalance - msgValue);
+        assertEq(address(nativeOFTAdapter).balance, amountToSend);
+        assertEq(bOFT.balanceOf(userB), amountToSend);
     }
 
-    function test_send_oft_compose_msg() public {
-        uint256 tokensToSend = 1 ether;
+    function test_send_native_oft_adapter_compose_msg() public {
+        uint256 amountToSend = 1 ether;
 
         OFTComposerMock composer = new OFTComposerMock();
 
@@ -113,19 +111,22 @@ contract VfyOFTTest is TestHelperOz5 {
         SendParam memory sendParam = SendParam(
             bEid,
             addressToBytes32(address(composer)),
-            tokensToSend,
-            tokensToSend,
+            amountToSend,
+            amountToSend,
             options,
             composeMsg,
             ""
         );
-        MessagingFee memory fee = aOFT.quoteSend(sendParam, false);
+        MessagingFee memory fee = nativeOFTAdapter.quoteSend(sendParam, false);
 
-        assertEq(aOFT.balanceOf(userA), initialBalance);
+        assertEq(userA.balance, initialNativeBalance);
+        assertEq(address(nativeOFTAdapter).balance, 0);
         assertEq(bOFT.balanceOf(address(composer)), 0);
 
+        uint256 msgValue = fee.nativeFee + nativeOFTAdapter.removeDust(amountToSend);
+
         vm.prank(userA);
-        (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) = aOFT.send{ value: fee.nativeFee }(
+        (MessagingReceipt memory msgReceipt, OFTReceipt memory oftReceipt) = nativeOFTAdapter.send{ value: msgValue }(
             sendParam,
             fee,
             payable(address(this))
@@ -133,7 +134,6 @@ contract VfyOFTTest is TestHelperOz5 {
         verifyPackets(bEid, addressToBytes32(address(bOFT)));
 
         // lzCompose params
-        uint32 dstEid_ = bEid;
         address from_ = address(bOFT);
         bytes memory options_ = options;
         bytes32 guid_ = msgReceipt.guid;
@@ -144,10 +144,11 @@ contract VfyOFTTest is TestHelperOz5 {
             oftReceipt.amountReceivedLD,
             abi.encodePacked(addressToBytes32(userA), composeMsg)
         );
-        this.lzCompose(dstEid_, from_, options_, guid_, to_, composerMsg_);
+        this.lzCompose(bEid, from_, options_, guid_, to_, composerMsg_);
 
-        assertEq(aOFT.balanceOf(userA), initialBalance - tokensToSend);
-        assertEq(bOFT.balanceOf(address(composer)), tokensToSend);
+        assertEq(userA.balance, initialNativeBalance - msgValue);
+        assertEq(address(nativeOFTAdapter).balance, amountToSend);
+        assertEq(bOFT.balanceOf(address(composer)), amountToSend);
 
         assertEq(composer.from(), from_);
         assertEq(composer.guid(), guid_);
@@ -156,5 +157,5 @@ contract VfyOFTTest is TestHelperOz5 {
         assertEq(composer.extraData(), composerMsg_); // default to setting the extraData to the message as well to test
     }
 
-    // TODO import the rest of oft tests?
+    // TODO import the rest of native oft adapter tests?
 }

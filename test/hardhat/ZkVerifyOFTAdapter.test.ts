@@ -5,19 +5,19 @@ import { deployments, ethers } from 'hardhat'
 
 import { Options } from '@layerzerolabs/lz-v2-utilities'
 
-describe('VfyNativeOFTAdapter Test', function () {
+describe('ZkVerifyOFTAdapter Test', function () {
     // Constant representing a mock Endpoint ID for testing purposes
     const eidA = 1
     const eidB = 2
     // Declaration of variables to be used in the test suite
-    let VfyNativeOFTAdapter: ContractFactory
-    let VfyOFT: ContractFactory
+    let ZkVerifyOFTAdapter: ContractFactory
+    let ZkVerifyToken: ContractFactory
     let EndpointV2Mock: ContractFactory
     let ownerA: SignerWithAddress
     let ownerB: SignerWithAddress
     let endpointOwner: SignerWithAddress
-    let vfyNativeOFTAdapter: Contract
-    let vfyOFTB: Contract
+    let zkVerifyOFTAdapter: Contract
+    let zkVerifyTokenB: Contract
     let mockEndpointV2A: Contract
     let mockEndpointV2B: Contract
 
@@ -26,9 +26,9 @@ describe('VfyNativeOFTAdapter Test', function () {
         // Contract factory for our tested contract
         //
         // We are using a derived contract that exposes a mint() function for testing purposes
-        VfyNativeOFTAdapter = await ethers.getContractFactory('VfyNativeOFTAdapterMock')
+        ZkVerifyOFTAdapter = await ethers.getContractFactory('ZkVerifyOFTAdapterMock')
 
-        VfyOFT = await ethers.getContractFactory('VfyOFTMock')
+        ZkVerifyToken = await ethers.getContractFactory('ZkVerifyTokenMock')
 
         // Fetching the first three signers (accounts) from Hardhat's local Ethereum network
         const signers = await ethers.getSigners()
@@ -53,16 +53,16 @@ describe('VfyNativeOFTAdapter Test', function () {
         mockEndpointV2B = await EndpointV2Mock.deploy(eidB)
 
         // Deploying contracts and linking them to the mock LZEndpoint
-        vfyNativeOFTAdapter = await VfyNativeOFTAdapter.deploy(18, mockEndpointV2A.address, ownerA.address)
-        vfyOFTB = await VfyOFT.deploy('vfyOFTB', 'bOFT', mockEndpointV2B.address, ownerB.address)
+        zkVerifyOFTAdapter = await ZkVerifyOFTAdapter.deploy(18, mockEndpointV2A.address, ownerA.address)
+        zkVerifyTokenB = await ZkVerifyToken.deploy('zkVerify', 'VFY', mockEndpointV2B.address, ownerB.address)
 
-        // Setting destination endpoints in the LZEndpoint mock for each VfyOFT instance
-        await mockEndpointV2A.setDestLzEndpoint(vfyOFTB.address, mockEndpointV2B.address)
-        await mockEndpointV2B.setDestLzEndpoint(vfyNativeOFTAdapter.address, mockEndpointV2A.address)
+        // Setting destination endpoints in the LZEndpoint mock for each ZkVerifyToken instance
+        await mockEndpointV2A.setDestLzEndpoint(zkVerifyTokenB.address, mockEndpointV2B.address)
+        await mockEndpointV2B.setDestLzEndpoint(zkVerifyOFTAdapter.address, mockEndpointV2A.address)
 
         // Setting peers in the mock LZEndpoint
-        await vfyNativeOFTAdapter.connect(ownerA).setPeer(eidB, ethers.utils.zeroPad(vfyOFTB.address, 32))
-        await vfyOFTB.connect(ownerB).setPeer(eidA, ethers.utils.zeroPad(vfyNativeOFTAdapter.address, 32))
+        await zkVerifyOFTAdapter.connect(ownerA).setPeer(eidB, ethers.utils.zeroPad(zkVerifyTokenB.address, 32))
+        await zkVerifyTokenB.connect(ownerB).setPeer(eidA, ethers.utils.zeroPad(zkVerifyOFTAdapter.address, 32))
     })
 
     // A test case to verify native transfer functionality
@@ -86,20 +86,20 @@ describe('VfyNativeOFTAdapter Test', function () {
         ]
 
         // Fetching the native fee for the token send operation
-        const [nativeFee] = await vfyNativeOFTAdapter.connect(ownerA).quoteSend(sendParam, false)
+        const [nativeFee] = await zkVerifyOFTAdapter.connect(ownerA).quoteSend(sendParam, false)
 
-        const msgValue = nativeFee.add(await vfyNativeOFTAdapter.removeDust(amountToSend))
+        const msgValue = nativeFee.add(await zkVerifyOFTAdapter.removeDust(amountToSend))
 
         // Executing the send operation from vfyNativeOFTAdapter contract
-        const tx = await vfyNativeOFTAdapter
+        const tx = await zkVerifyOFTAdapter
             .connect(ownerA)
             .send(sendParam, [nativeFee, 0], ownerA.address, { value: msgValue })
         const receipt = await tx.wait()
 
         // Fetching the final balances of ownerA, ownerB, and adapter
         const finalBalanceA = await ethers.provider.getBalance(ownerA.address)
-        const finalBalanceAdapter = await ethers.provider.getBalance(vfyNativeOFTAdapter.address)
-        const finalBalanceB = await vfyOFTB.balanceOf(ownerB.address)
+        const finalBalanceAdapter = await ethers.provider.getBalance(zkVerifyOFTAdapter.address)
+        const finalBalanceB = await zkVerifyTokenB.balanceOf(ownerB.address)
 
         const gasUsed = receipt.gasUsed.mul(receipt.effectiveGasPrice)
         const expectedFinalBalanceA = initialBalanceA.sub(msgValue.add(gasUsed))

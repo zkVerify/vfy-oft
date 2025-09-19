@@ -52,21 +52,29 @@ const config: HardhatUserConfig = {
         ],
     },
     networks: {
-        'sepolia-testnet': {
-            eid: EndpointId.SEPOLIA_V2_TESTNET,
-            url: process.env.RPC_URL_SEPOLIA || 'https://rpc.sepolia.org/',
+        'zkverify-testnet': {
+            eid: EndpointId.ZKVERIFY_V2_TESTNET,
+            url: process.env.RPC_URL_ZKVERIFY_TESTNET || 'https://vflow-volta-rpc.zkverify.io',
             accounts,
         },
-        'avalanche-testnet': {
-            eid: EndpointId.AVALANCHE_V2_TESTNET,
-            url: process.env.RPC_URL_FUJI || 'https://rpc.ankr.com/avalanche_fuji',
+        'base-testnet': {
+            eid: EndpointId.BASESEP_V2_TESTNET,
+            url: process.env.RPC_URL_BASE_TESTNET || 'https://base-sepolia-rpc.publicnode.com',
             accounts,
         },
-        'amoy-testnet': {
-            eid: EndpointId.AMOY_V2_TESTNET,
-            url: process.env.RPC_URL_AMOY || 'https://polygon-amoy-bor-rpc.publicnode.com',
+        'bsc-testnet': {
+            eid: EndpointId.BSC_V2_TESTNET,
+            url: process.env.RPC_URL_BSC_TESTNET || 'https://bsc-testnet-rpc.publicnode.com',
             accounts,
         },
+        base: {
+            eid: EndpointId.BASE_V2_MAINNET,
+            url: process.env.RPC_URL_BASE_MAINNET || 'https://base-rpc.publicnode.com',
+        },
+        // zkverify: {
+        //     eid: EndpointId.ZKVERIFY_V2_MAINNET,
+        //     url: process.env.RPC_URL_ZKVERIFY_MAINNET || 'https://vflow-rpc.zkverify.io',
+        // },
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit
             allowUnlimitedContractSize: true,
