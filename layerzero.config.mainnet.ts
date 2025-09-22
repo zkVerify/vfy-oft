@@ -3,13 +3,13 @@ import { OAppEnforcedOption, OmniPointHardhat } from '@layerzerolabs/toolbox-har
 import { EndpointId } from '@layerzerolabs/lz-definitions'
 import { generateConnectionsConfig } from '@layerzerolabs/metadata-tools'
 
-// /**
-//  *  WARNING: ONLY 1 ZkVerifyOFTAdapter should exist for a given global mesh.
-//  */
-// const zkVerifyContract: OmniPointHardhat = {
-//     eid: EndpointId.ZKVERIFY_V2_MAINNET,
-//     contractName: 'ZkVerifyOFTAdapter',
-// }
+/**
+ *  WARNING: ONLY 1 ZkVerifyOFTAdapter should exist for a given global mesh.
+ */
+const zkVerifyContract: OmniPointHardhat = {
+    eid: EndpointId.ZKVERIFY_V2_MAINNET,
+    contractName: 'ZkVerifyOFTAdapter',
+}
 
 const baseContract: OmniPointHardhat = {
     eid: EndpointId.BASE_V2_MAINNET,
@@ -40,20 +40,17 @@ const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [
 
 export default async function () {
     const connections = await generateConnectionsConfig([
-        // [
-        //     zkVerifyContract,
-        //     baseContract,
-        //     [['Horizen'], [['LayerZero Labs'], 1]],
-        //     [6, 3],
-        //     [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
-        // ],
+        [
+            zkVerifyContract,
+            baseContract,
+            [['Horizen'], [['LayerZero Labs'], 1]],
+            [6, 3],
+            [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
+        ],
     ])
 
     return {
-        contracts: [
-            // { contract: zkVerifyContract },
-            { contract: baseContract },
-        ],
+        contracts: [{ contract: zkVerifyContract }, { contract: baseContract }],
         connections,
     }
 }
