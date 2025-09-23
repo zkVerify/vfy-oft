@@ -15,9 +15,15 @@ importers:
       '@babel/core':
         specifier: ^7.28.4
         version: 7.28.4
+      '@layerzerolabs/devtools-evm-hardhat':
+        specifier: ^4.0.0
+        version: 4.0.0(9b0fa8327da86e3b7fba509046ea0f4c)
       '@layerzerolabs/eslint-config-next':
         specifier: ~2.3.44
         version: 2.3.44(typescript@5.9.2)
+      '@layerzerolabs/io-devtools':
+        specifier: ^0.3.1
+        version: 0.3.1(ink-gradient@2.0.0(ink@3.2.0(bufferutil@4.0.9)(react@17.0.2)(utf-8-validate@5.0.10))(react@17.0.2))(ink-table@3.1.0(ink@3.2.0(bufferutil@4.0.9)(react@17.0.2)(utf-8-validate@5.0.10))(react@17.0.2))(ink@3.2.0(bufferutil@4.0.9)(react@17.0.2)(utf-8-validate@5.0.10))(react@17.0.2)(yoga-layout-prebuilt@1.10.0)(zod@3.25.76)
       '@layerzerolabs/lz-definitions':
         specifier: ^3.0.134
         version: 3.0.134
