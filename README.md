@@ -105,10 +105,33 @@ More information about available CLI arguments can be found using the `--help` f
 npx hardhat lz:deploy --help
 ```
 
-By following these steps, you can focus more on creating innovative omnichain solutions and less on the complexities of cross-chain communication.
+## 3) Wire
 
-<br></br>
+```bash
+npx hardhat lz:oapp:wire --oapp-config <LZOAPP_CONFIG_FILE>
+```
 
-<p align="center">
-  Join our <a href="https://layerzero.network/community" style="color: #a77dff">community</a>! | Follow us on <a href="https://x.com/LayerZero_Labs" style="color: #a77dff">X (formerly Twitter)</a>
-</p>
+where `LZOAPP_CONFIG_FILE` is `layerzero.config.testnet.ts` or `layerzero.config.mainnet.ts`, respectively for testnet or mainnet.
+
+## 4) Send
+
+```bash
+npx hardhat lz:oft:send --oapp-config <LZOAPP_CONFIG_FILE> --amount <HR_AMOUNT> --src-eid <SRC_EID> --to <EVM_RECIPIENT> --dst-eid <DST_EID>
+```
+
+where:
+
+- `LZOAPP_CONFIG_FILE` is `layerzero.config.testnet.ts` or `layerzero.config.mainnet.ts`, respectively for testnet or mainnet.
+- `HR_AMOUNT` is the amount to be sent, in human readable format (e.g. `1.75`)
+
+Upon a successful send, the script will provide you with the link to the message on LayerZero Scan.
+
+Once the message is delivered, you will be able to click on the destination transaction hash to verify that the OFT was sent.
+
+## Contract Verification
+
+You can verify EVM chain contracts using the LayerZero helper package:
+
+```bash
+pnpm dlx @layerzerolabs/verify-contract -n <NETWORK_NAME> -u <API_URL> -k <API_KEY> --contracts <CONTRACT_NAME>
+```
