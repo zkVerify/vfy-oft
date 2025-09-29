@@ -70,9 +70,27 @@ export default async function () {
 
     return {
         contracts: [
-            { contract: zkVerifyTestnetContract },
-            { contract: baseTestnetContract },
-            { contract: bscTestnetContract },
+            {
+                contract: zkVerifyTestnetContract,
+                config: {
+                    delegate: '0x1fFD7C562335D06D5439E40Ca3d5c04a708B63A5',
+                    owner: '0x1fFD7C562335D06D5439E40Ca3d5c04a708B63A5',
+                },
+            },
+            {
+                contract: baseTestnetContract,
+                config: {
+                    delegate: '0x1fFD7C562335D06D5439E40Ca3d5c04a708B63A5',
+                    owner: '0x1fFD7C562335D06D5439E40Ca3d5c04a708B63A5',
+                },
+            },
+            {
+                contract: bscTestnetContract,
+                config: {
+                    delegate: '0x1fFD7C562335D06D5439E40Ca3d5c04a708B63A5',
+                    owner: '0x1fFD7C562335D06D5439E40Ca3d5c04a708B63A5',
+                },
+            },
         ],
         connections,
     }

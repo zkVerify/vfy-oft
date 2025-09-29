@@ -50,7 +50,22 @@ export default async function () {
     ])
 
     return {
-        contracts: [{ contract: zkVerifyContract }, { contract: baseContract }],
+        contracts: [
+            {
+                contract: zkVerifyContract,
+                config: {
+                    delegate: '0xF7Db1A1Dfb47796F9FD0DB13Ada743054c7B02B4',
+                    owner: '0xF7Db1A1Dfb47796F9FD0DB13Ada743054c7B02B4',
+                },
+            },
+            {
+                contract: baseContract,
+                config: {
+                    delegate: '0x4599ECB720dAfa588825084EC9F5c1D699Ccc57f',
+                    owner: '0x4599ECB720dAfa588825084EC9F5c1D699Ccc57f',
+                },
+            },
+        ],
         connections,
     }
 }
