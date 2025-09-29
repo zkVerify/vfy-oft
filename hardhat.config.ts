@@ -69,7 +69,7 @@ const config: HardhatUserConfig = {
         },
         base: {
             eid: EndpointId.BASE_V2_MAINNET,
-            url: process.env.RPC_URL_BASE_MAINNET || 'https://base-rpc.publicnode.com',
+            url: process.env.RPC_URL_BASE_MAINNET || 'https://mainnet.base.org',
             accounts,
         },
         zkverify: {
