@@ -43,7 +43,7 @@ export default async function () {
         [
             zkVerifyContract,
             baseContract,
-            [['Horizen'], [['LayerZero Labs'], 1]],
+            [['LayerZero Labs', 'Horizen', 'Nethermind'], [[], 0]],
             [6, 3],
             [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS],
         ],
@@ -54,8 +54,8 @@ export default async function () {
             {
                 contract: zkVerifyContract,
                 config: {
-                    delegate: '0xF7Db1A1Dfb47796F9FD0DB13Ada743054c7B02B4',
-                    owner: '0xF7Db1A1Dfb47796F9FD0DB13Ada743054c7B02B4',
+                    delegate: '0x4599ECB720dAfa588825084EC9F5c1D699Ccc57f',
+                    owner: '0x4599ECB720dAfa588825084EC9F5c1D699Ccc57f',
                 },
             },
             {
