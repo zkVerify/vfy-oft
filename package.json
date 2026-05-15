@@ -22,7 +22,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",
+    "@layerzerolabs/devtools-evm-hardhat": "^4.0.0",
     "@layerzerolabs/eslint-config-next": "~2.3.44",
+    "@layerzerolabs/io-devtools": "^0.3.1",
     "@layerzerolabs/lz-definitions": "^3.0.134",
     "@layerzerolabs/lz-evm-messagelib-v2": "^3.0.134",
     "@layerzerolabs/lz-evm-protocol-v2": "^3.0.134",
@@ -67,6 +69,9 @@
     "overrides": {
       "ethers": "^5.7.2",
       "hardhat-deploy": "^0.12.1"
+    },
+    "patchedDependencies": {
+      "micro-eth-signer@0.14.0": "patches/micro-eth-signer@0.14.0.patch"
     }
   },
   "overrides": {
